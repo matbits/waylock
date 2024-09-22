@@ -76,7 +76,10 @@ pub fn lock_screen(options: &Options) -> io::Result<()> {
 
     let lock_input = LockInput::new(&lock_env, event_loop.handle());
 
-    WaylandSource::new(queue).quick_insert(event_loop.handle())?;
+    match WaylandSource::new(queue).quick_insert(event_loop.handle()) {
+        Ok(_) => (),
+        Err(err) => return std::result::Result::Err(std::io::Error::other(err.error)),
+    }
 
     let lock_auth = LockAuth::new();
     let mut current_password = String::new();
@@ -150,7 +153,7 @@ pub fn lock_screen(options: &Options) -> io::Result<()> {
         }
 
         retry_on_interrupt(|| display.flush())?;
-        retry_on_interrupt(|| event_loop.dispatch(None, &mut ()))?;
+        let _ = retry_on_interrupt(|| Ok(event_loop.dispatch(None, &mut ())))?;
     }
 }
 

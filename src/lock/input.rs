@@ -20,7 +20,7 @@ pub struct LockInput {
 
 struct LockSeat {
     name: String,
-    keyboard: Option<(wl_keyboard::WlKeyboard, calloop::RegistrationToken)>,
+    keyboard: Option<wl_keyboard::WlKeyboard>,
     pointer: Option<wl_pointer::WlPointer>,
 }
 
@@ -62,8 +62,8 @@ impl LockInput {
                         keyboard::RepeatKind::System,
                         move |event, _, _| handle_keyboard_event(event, &input_queue_handle_handle),
                     ) {
-                        Ok((kbd, repeat_source)) => {
-                            lock_seat.keyboard = Some((kbd, repeat_source));
+                        Ok(kbd) => {
+                            lock_seat.keyboard =  Some(kbd);
                         }
                         Err(err) => log::error!(
                             "Failed to map seat '{}' keyboard: {:?}",
@@ -72,11 +72,10 @@ impl LockInput {
                         ),
                     }
                 }
-            } else if let Some((kbd, repeat_source)) = lock_seat.keyboard.take() {
+            } else if let Some(kbd) = lock_seat.keyboard.take() {
                 // If the seat has no keyboard capability but we have a keyboard stored, release it
                 // as well as the repeat source if it exists.
                 kbd.release();
-                loop_handle.remove(repeat_source);
             }
 
             if seat_data.has_pointer && !seat_data.defunct {
