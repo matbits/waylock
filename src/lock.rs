@@ -94,6 +94,8 @@ pub fn lock_screen(options: &Options) -> io::Result<()> {
         while let Some((keysym, utf8)) = lock_input.pop() {
             match keysym {
                 keysyms::XKB_KEY_KP_Enter | keysyms::XKB_KEY_Return => {
+                    set_color(options.wait_color);
+
                     if lock_auth.check_password(&current_password) {
                         return Ok(());
                     } else {

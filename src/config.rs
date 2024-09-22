@@ -58,6 +58,7 @@ pub struct Config {
 pub struct Colors {
     pub init_color: Option<u32>,
     pub input_color: Option<u32>,
+    pub wait_color: Option<u32>,
     pub fail_color: Option<u32>,
 }
 

@@ -10,6 +10,7 @@ pub struct Options {
 
     pub init_color: u32,
     pub input_color: u32,
+    pub wait_color: u32,
     pub fail_color: u32,
 }
 
@@ -38,6 +39,14 @@ impl Options {
                 Arg::with_name("input-color")
                     .long("input-color")
                     .help("Set the color of the lock screen after input is received. [default: #0000ff]")
+                    .next_line_help(true)
+                    .value_name("COLOR")
+                    .validator(valid_color),
+            )
+            .arg(
+                Arg::with_name("wait-color")
+                    .long("wait-color")
+                    .help("Set the color of the lock screen while authenticate. [default: #00ff00]")
                     .next_line_help(true)
                     .value_name("COLOR")
                     .validator(valid_color),
@@ -95,6 +104,7 @@ impl Options {
         // The vaildator supplied to clap will deny any colors that can't be safetly unwrapped.
         let mut init_color = matches.value_of("init-color").map(|s| color::from_str(s).unwrap());
         let mut input_color = matches.value_of("input-color").map(|s| color::from_str(s).unwrap());
+        let mut wait_color = matches.value_of("wait-color").map(|s| color::from_str(s).unwrap());
         let mut fail_color = matches.value_of("fail-color").map(|s| color::from_str(s).unwrap());
 
         // It's fine if there's no config file, but if we encountered an error report it.
@@ -106,6 +116,7 @@ impl Options {
                     let make_solid = |c| 0xff00_0000 | c;
                     init_color = init_color.or_else(|| colors.init_color.map(make_solid));
                     input_color = input_color.or_else(|| colors.input_color.map(make_solid));
+                    wait_color = wait_color.or_else(|| colors.wait_color.map(make_solid));
                     fail_color = fail_color.or_else(|| colors.fail_color.map(make_solid));
                 }
             }
@@ -119,6 +130,7 @@ impl Options {
             fail_command,
             init_color: init_color.unwrap_or(0xffff_ffff),
             input_color: input_color.unwrap_or(0xff00_00ff),
+            wait_color: wait_color.unwrap_or(0xff00_ff00),
             fail_color: fail_color.unwrap_or(0xffff_0000),
         }
     }
